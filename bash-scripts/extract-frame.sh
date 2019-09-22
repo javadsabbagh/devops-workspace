@@ -12,6 +12,7 @@ process_dir() {
     echo Exiting directory "$file"
 }
 
+
 extract_file_frames() {
     if [ ${1: -4} == ".mp4" ]; then
         file_name="$(basename -- "$1")" # file name and extension
@@ -23,5 +24,5 @@ extract_file_frames() {
     fi
 }
 
-dir='/run/media/javad/2E48FBFC48FBC11F/DATA-Partition/Video Coursers/Python/Learn Cryptography Basics in Python'
+dir='/run/media/javad/2E48FBFC48FBC11F/DATA-Partition/Video Coursers/DevOps/Lynda - Docker for Java Developers/'
 process_dir "$dir"
