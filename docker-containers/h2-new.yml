@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  h2:
+    image: oscarfonts/h2:alpine
+    restart: always
+    ports: 
+      - 1521:1521   ## used for connecting to database server
+      - 8181:81     ## used for webconsole
+    volumes:
+      - /home/javad/DockerVolumes/h2:/opt/h2-data

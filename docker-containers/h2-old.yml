@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  h2:
+    image: 1000kit/h2
+    container_name: 'h2'
+    restart: always
+    ports:
+      - "1521:1521"  ## used for connecting to database server
+      - "8181:8181"  ## used for webconsole
+    volumes:
+      - /home/javad/DockerVolumes/h2:/opt/h2-data

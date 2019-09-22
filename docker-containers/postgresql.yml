@@ -1,0 +1,16 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres:11-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: p@ssw0rd
+      POSTGRES_USER: kodnuts
+      POSTGRES_DB: trainings
+    ports: 
+      - 5432:5432
+    volumes:
+      - /home/javad/DockerVolumes/postgres-11:/var/lib/postgresql/data
