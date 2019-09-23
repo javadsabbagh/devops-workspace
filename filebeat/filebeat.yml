@@ -1,0 +1,71 @@
+# filebeat.yml
+
+
+################################################################
+#
+#  Visit the following pages for more information on defining custom index templates:
+#     https://www.elastic.co/guide/en/beats/filebeat/6.7/filebeat-template.html
+#     https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-template.html
+# 
+################################################################
+
+filebeat.inputs:
+- type: log
+  json.keys_under_root: true
+  json.add_error_key: true
+  json.overwrite_keys: true
+# Json key name, which value contains a sub JSON document produced by our application Console Appender  
+  json.message_key: message
+  enabled: true
+  encoding: utf-8
+  #document_type: docker
+  paths:
+   #- '/opt/newplan/base-info/logs/*.log'
+   #- '/opt/newplan/clr-service/logs/*.log'
+   #- '/opt/newplan/healthy-check/logs/*.log'
+   - '/opt/newplan/ecs/logs/*.log'
+   #- '/opt/newplan/ums/logs/*.log'
+   #- '/opt/newplan/wge/logs/*.log'
+
+processors:
+# decode the log field (sub JSON document) if JSONencoded, then maps it's fields to elasticsearch fields
+- decode_json_fields:
+    fields: ["message"]
+    target: ""
+# overwrite existing target elasticsearch fields while decoding json fields
+    overwrite_keys: true
+#- add_docker_metadata: ~
+ 
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 3
+#  index.number_of_replicas: 1
+  
+setup.kibana:
+  host: "192.168.100.119:5601"
+  protocol: "http"
+# path needed if kibana not at website root  
+# path: "api/kibana"
+
+output.elasticsearch:
+  hosts: ["192.168.100.119:9200"]
+  index: "chq-%{[beat.version]}-%{+yyyy.MM.dd}"
+  protocol: "http"
+
+setup.template.enabled: true
+setup.template.name: "chq"
+setup.template.pattern: "chq-*"
+setup.template.overwrite: true
+setup.template.fields: "/etc/filebeat/fields.yml"
+setup.dashboards.index: "chq-*"
+
+# Write Filebeat own logs only to file to avoid catching them with itself in docker log files
+logging.to_files: true
+logging.to_syslog: false
+
+# X-pack optional module
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch:
