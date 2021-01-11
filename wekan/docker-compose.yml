@@ -160,7 +160,7 @@ services:
       #  - http://example.com
       #  - http://boards.example.com
       #  - http://192.168.1.100    <=== using at local LAN
-      - ROOT_URL=http://192.168.100.119  #   <=== using only at same laptop/desktop where Wekan is installed
+      - ROOT_URL=http://148.251.100.3  #   <=== using only at same laptop/desktop where Wekan is installed
       #---------------------------------------------------------------
       # ==== EMAIL SETTINGS ====
       # Email settings are required in both MAIL_URL and Admin Panel,
@@ -170,8 +170,8 @@ services:
       #       You can encode those characters for example at: https://www.urlencoder.org
       #- MAIL_URL=smtp://user:pass@mailserver.example.com:25/
       #- MAIL_URL=smtp://<mail_url>:25/?ignoreTLS=true&tls={rejectUnauthorized:false}
-      - MAIL_URL=smtp://sabbagh.j:oceania406@192.168.100.81:25/
-      - MAIL_FROM=Wekan Notifications <noreply.wekan@mydomain.com>
+      #- MAIL_URL=
+      #- MAIL_FROM=Wekan Notifications <noreply.wekan@mydomain.com>
       #---------------------------------------------------------------
       # ==== OPTIONAL: MONGO OPLOG SETTINGS =====
       # https://github.com/wekan/wekan-mongodb/issues/2#issuecomment-378343587
