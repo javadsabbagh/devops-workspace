@@ -1,5 +1,5 @@
 #!/bin/sh
-cd /home/user/wekan
+cd /home/javad/Projects/devops/wekan
 docker cp backup-db-inside-docker.sh  wekan-db:/data
 docker exec -it wekan-db sh /data/backup-db-inside-docker.sh
 docker cp wekan-db:/data/dump .

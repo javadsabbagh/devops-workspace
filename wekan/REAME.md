@@ -10,6 +10,6 @@ crontab -e
 ```
 
 # m h  dom mon dow   command
-0 10,16  *  *   *     /home/user/wekan/backup-job.sh
+0 10,16  *  *   *     /home/javad/Projects/devops/wekan/backup-job.sh
 
 
