@@ -1,0 +1,47 @@
+version: '2'
+
+services:
+
+  kongdb:
+    image: postgres:9.6
+    container_name: kong-database
+    restart: always
+    networks:
+      - kong-net
+    ports:  
+      - 5432:5432
+    # volumes:
+    #   - kong-db:/data/db
+    #   - kong-db-dump:/dump
+    environment:
+      - POSTGRES_USER=kong
+      - POSTGRES_DB=kong
+
+
+  kong:driver2_LOGIN_STYLE=redirect
+      - OAUTH2_CLIENT_ID=wekan-app
+      - OAUTH2_SERVER_URL=http://192.168.100.111/auth
+      - OAUTH2_AUTH_ENDPOINT=/realms/wekan/protocol/openid-connect/auth
+      - OAUTH2_USERINFO_ENDPOINT=/realms/wekan/protocol/openid-connect/userinfo
+      - OAUTH2_TOKEN_ENDPOINT=/realms/wekan/protocol/openid-connect/token
+      - OAUTH2_SECRET=a0aac067-0ff4-43e3-ad18-aab5fc7c6e37
+      - OAUTH2_ID_MAP=preferred_username
+      - OAUTH2_USERNAME_MAP=preferred_username
+      - OAUTH2_FULLNAME_MAP=given_name
+      - OAUTH2_EMAIL_MAP=email      
+    depends_on:
+      - wekandb
+
+
+volumes:
+  kong-db:
+    driver: local
+  kong-db-dump:
+    driver: local
+
+networks:
+  kong-net:
+    driver: bridge
+
+
+      
