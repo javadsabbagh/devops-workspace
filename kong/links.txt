@@ -1,0 +1,15 @@
+- https://konghq.com/blog/observability-kubernetes-kong/
+- https://docs.konghq.com/hub/kong-inc/prometheus/
+- https://github.com/Kong/kong-plugin-prometheus
+- https://www.youtube.com/results?search_query=nginx+prometheus+plugin
+
+
+Solve net error for docker when open vpn is running:
+    - https://stackoverflow.com/questions/43720339/docker-error-could-not-find-an-available-non-overlapping-ipv4-address-pool-am
+
+- https://github.com/Kong/docker-kong
+
+
+open source service mesh by kong
+- https://kuma.io/ 
+

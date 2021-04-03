@@ -3,12 +3,7 @@ version: '3.7'
 volumes:
   kong_data: {}
 
-# networks:
-#   kong-net:
-#     external: false
-
-
-## For machines running proxy on them
+## For machines running proxy (OpenVPN) on them
 networks:
   kong-net:
     driver: bridge
@@ -18,14 +13,20 @@ networks:
 
 # networks:
 #   kong-net:
+#     external: false
+
+# networks:
+#   kong-net:
 #     driver: bridge    
 
 services:
+  ## Note: If you are running Kong for the first time and you want to create Kong Database for the first time, run:
+  ## docker-compose up kong-migrations
   kong-migrations:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     command: kong migrations bootstrap
     depends_on:
-      - db
+      - kong-db
     environment:
       KONG_DATABASE: postgres
       KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
@@ -41,15 +42,17 @@ services:
       restart_policy:
         condition: on-failure
 
+  ## Note: If you want to update kong version and need to migrate kong database, run:
+  ## docker-compose up kong-migrations-up
   kong-migrations-up:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     command: kong migrations up && kong migrations finish
     depends_on:
-      - db
+      - kong-db
     environment:
       KONG_DATABASE: postgres
       KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
-      KONG_PG_HOST: db
+      KONG_PG_HOST: kong-db
       KONG_PG_USER: ${KONG_PG_USER:-kong}
       KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
     secrets:
@@ -65,7 +68,7 @@ services:
     image: "${KONG_DOCKER_TAG:-kong:latest}"
     user: "${KONG_USER:-kong}"
     depends_on:
-      - db
+      - kong-db
     environment:
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
@@ -83,10 +86,10 @@ services:
     networks:
       - kong-net
     ports:
-      - "8000:8000/tcp"
-      - "127.0.0.1:8001:8001/tcp"
-      - "8443:8443/tcp"
-      - "127.0.0.1:8444:8444/tcp"
+      - "8000:8000/tcp"                   ## Note: Noramlly, it should be 80
+      - "127.0.0.1:8001:8001/tcp"         # Admin port, insecured
+      - "8443:8443/tcp"                   ## Note: Noramlly, it should be 443
+      - "127.0.0.1:8444:8444/tcp"         # Admin port, secured
     healthcheck:
       test: ["CMD", "kong", "health"]
       interval: 10s
@@ -96,8 +99,40 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+
+  kong-ui:
+    image: pantsel/konga:next
+    depends_on:
+      - kong
+    environment:
+      DB_ADAPTER: postgres           # 'mongo','postgres','sqlserver'  or 'mysql'
+      DB_HOST: kong-db
+      # DB_PORT: 5432                # optional defaults to 5432 ??
+      DB_USER: kong                  # Arbitrary db user
+      DB_PASSWORD: kong 
+      DB_DATABASE: kong_ui           # Arbitrary db name
+      #DB_PG_SCHEMA: konga           # Optional for postgresql
+      NODE_ENV: production          # development | production
+      TOKEN_SECRET: eqywtqwbrwqekfsdghf648fkqreytiyufr8347hu    ## Optional random secret string
+    ports:
+      - "1337:1337/tcp"             # Note: development port --> 1337, production port --> 1338
+    networks:
+      - kong-net     
+
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ### Theme (Optional)
+      ADMINER_DESIGN: "nette"
+      ### Different plugins can be optionally added and configured here
+      #ADMINER_PLUGINS: "login-servers tables-filter tinymce"
+    networks:
+      - kong-net
+    ports:
+      - 8080:8080
     
-  db:
+  kong-db:
     image: postgres:9.6
     environment:
       POSTGRES_DB: ${KONG_PG_DATABASE:-kong}
@@ -116,6 +151,8 @@ services:
         condition: on-failure
     stdin_open: true
     tty: true
+    # ports:
+    #  - "127.0.0.1:5432:5432/tcp"    ### Warning: no need to expose DB port!
     networks:
       - kong-net
     volumes:
