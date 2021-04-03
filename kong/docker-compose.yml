@@ -30,7 +30,7 @@ services:
     environment:
       KONG_DATABASE: postgres
       KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
-      KONG_PG_HOST: db
+      KONG_PG_HOST: kong-db
       KONG_PG_USER: ${KONG_PG_USER:-kong}
       KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
     secrets:
@@ -72,15 +72,26 @@ services:
     environment:
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_LISTEN: '0.0.0.0:8001'
-      KONG_CASSANDRA_CONTACT_POINTS: db
-      KONG_DATABASE: postgres
+      # KONG_PROXY_ACCESS_LOG: /dev/stdout
+      # KONG_PROXY_ERROR_LOG: /dev/stderr
+
+      KONG_ADMIN_LISTEN: '0.0.0.0:8001'      # binds to docker network interface (bridge, host, whatever)
+      
+      ### Note: Other possible config
+      # KONG_ADMIN_LISTEN: '0.0.0.0:8001 reuseport backlog=16384, 0.0.0.0:8444 http2 ssl reuseport backlog=16384'      
+
+      ### Config reverse proxy port
+      # KONG_PROXY_LISTEN: '0.0.0.0:8000 reuseport backlog=16384, 0.0.0.0:8443 http2 ssl reuseport backlog=16384'
+      
+      # KONG_CASSANDRA_CONTACT_POINTS: db    ## Cassandra specific
+      KONG_DATABASE: postgres                # postgresql | cassandra
       KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
-      KONG_PG_HOST: db
+      KONG_PG_HOST: kong-db
       KONG_PG_USER: ${KONG_PG_USER:-kong}
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_PROXY_ERROR_LOG: /dev/stderr
       KONG_PG_PASSWORD_FILE: /run/secrets/kong_postgres_password
+      # KONG_ANONYMOUS_REPORTS: off
     secrets:
       - kong_postgres_password
     networks:
@@ -95,7 +106,12 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
-    restart: on-failure
+    restart: always
+    sysctls:
+      net.core.somaxconn=16384
+      # net.ipv6.conf.all.disable_ipv6: 0
+      # net.ipv4.conf.all.forwarding: 1
+      # net.ipv6.conf.all.forwarding: 1
     deploy:
       restart_policy:
         condition: on-failure
@@ -107,21 +123,24 @@ services:
     environment:
       DB_ADAPTER: postgres           # 'mongo','postgres','sqlserver'  or 'mysql'
       DB_HOST: kong-db
-      # DB_PORT: 5432                # optional defaults to 5432 ??
+      # DB_PORT: 5432                # optional defaults to 5432
       DB_USER: kong                  # Arbitrary db user
       DB_PASSWORD: kong 
       DB_DATABASE: kong_ui           # Arbitrary db name
       #DB_PG_SCHEMA: konga           # Optional for postgresql
       NODE_ENV: production          # development | production
       TOKEN_SECRET: eqywtqwbrwqekfsdghf648fkqreytiyufr8347hu    ## Optional random secret string
+    restart: on-failure  
     ports:
-      - "1337:1337/tcp"             # Note: development port --> 1337, production port --> 1338
+      ### Note: development port --> 1337, production port --> 1338
+      ### Warning: Be careful by exposing this port
+      - "127.0.0.1:1337:1337/tcp"             
     networks:
       - kong-net     
 
   adminer:
     image: adminer
-    restart: always
+    restart: on-failure
     environment:
       ### Theme (Optional)
       ADMINER_DESIGN: "nette"
@@ -130,7 +149,7 @@ services:
     networks:
       - kong-net
     ports:
-      - 8080:8080
+      - 127.0.0.1:8080:8080       ### Warning: don't expose to outside world!
     
   kong-db:
     image: postgres:9.6
@@ -145,7 +164,7 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
-    restart: on-failure
+    restart: always
     deploy:
       restart_policy:
         condition: on-failure
