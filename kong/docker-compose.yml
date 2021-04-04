@@ -65,7 +65,7 @@ services:
         condition: on-failure
 
   kong:
-    image: "${KONG_DOCKER_TAG:-kong:latest}"
+    image: "${KONG_DOCKER_TAG:-tjb/kong:latest}"
     user: "${KONG_USER:-kong}"
     depends_on:
       - kong-db
