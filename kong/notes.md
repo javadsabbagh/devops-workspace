@@ -1,10 +1,10 @@
+# Build Kong Image
+We need to build a kong image based on official image that contains required plugins, e.g OIDC.
+We call it "tjb/kong" and use it in docker compose yaml file.
 
- docker run -d --name kong-database \
-                -p 5432:5432 \
-                -e "POSTGRES_USER=kong" \
-                -e "POSTGRES_PASSWORD=kong" \
-                -e "POSTGRES_DB=kong" \
-                postgres:9.6
+```bash
+docker build . --no-cache -t tjb/kong
+```
 
 
 docker run --rm \

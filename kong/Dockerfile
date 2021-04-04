@@ -1,4 +1,4 @@
-FROM kong:latest
+FROM kong:2.3.3-alpine
 
 LABEL description="Linux alpine + Kong + kong-oidc plugin"
 
